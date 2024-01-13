@@ -1,3 +1,6 @@
+require(mashr)
+require(ashr)
+
 TRADE_bivariate <- function(results1 = NULL,
                           results2 = NULL,
                           genes_exclude = NULL,
@@ -5,7 +8,7 @@ TRADE_bivariate <- function(results1 = NULL,
                           covariance_matrix_set,
                           component_varexplained_threshold = 0,
                           weight_nocorr = 1,
-                          samples = 0) {
+                          n_sample = NULL) {
   start_time = Sys.time()
 
   #Gene Exclusion
@@ -175,8 +178,8 @@ TRADE_bivariate <- function(results1 = NULL,
 
   #generate samples
 
-  if (samples > 0) {
-    component = sample(1:length(m$fitted_g$pi), size = samples, prob = m$fitted_g$pi, replace = TRUE)
+  if (!is.null(n_sample)) {
+    component = sample(1:length(m$fitted_g$pi), size = n_sample, prob = m$fitted_g$pi, replace = TRUE)
 
     component_table = table(component)
 

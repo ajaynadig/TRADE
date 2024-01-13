@@ -4,6 +4,7 @@ require(ashr)
 
 TRADE_univariate <- function(results = NULL,
                            annot_table = NULL,
+                           model_significant = TRUE,
                            n_sample = 10000,
                            genes_exclude = NULL) {
 
@@ -35,7 +36,7 @@ TRADE_univariate <- function(results = NULL,
   #Set number of samples to be drawn to estimate distribution features
   if (is.null(n_sample)) {n_sample = nrow(results)}
   message("Fitting mixture model")
-  main_output = get_distribution_output(results,n_sample, annot_table = annot_table)
+  main_output = get_distribution_output(results,n_sample, annot_table = annot_table, model_significant = model_significant)
 
   main_output$qc = list(num_na = num_na,
                         num_extreme = num_extreme,
@@ -64,7 +65,7 @@ fit_ash <- function(l2fc,l2fc_se,min_l2fc,max_l2fc,n_sample) {
               samples = samples))
 }
 
-get_distribution_output <- function(results,n_sample, annot_table = NULL) {
+get_distribution_output <- function(results,n_sample, annot_table = NULL, model_significant = TRUE) {
   min_effsize = min(results$log2FoldChange, na.rm = TRUE)
   max_effsize = max(results$log2FoldChange, na.rm = TRUE)
 
@@ -111,49 +112,65 @@ get_distribution_output <- function(results,n_sample, annot_table = NULL) {
     theme_bw()+
     labs(x = "Log2(FC)")
 
-  #significant genes: Bonferroni
-  sig_filter_Bonferroni = results$pvalue < 0.05/sum(!is.na(results$pvalue))
-  sig_filter_Bonferroni[is.na(sig_filter_Bonferroni)] <- FALSE
-  if (any(sig_filter_Bonferroni)){
+  if (model_significant) {
+    #significant genes: Bonferroni
+    sig_filter_Bonferroni = results$pvalue < 0.05/sum(!is.na(results$pvalue))
+    sig_filter_Bonferroni[is.na(sig_filter_Bonferroni)] <- FALSE
+    if (any(sig_filter_Bonferroni)){
 
-    sig_tim_Bonferroni <- frac_subset(results,sig_filter_Bonferroni,!sig_filter_Bonferroni,min_effsize,max_effsize,n_sample)
-    var_sig_Bonferroni = sig_tim_Bonferroni$var_subset
-    var_nonsig_Bonferroni = sig_tim_Bonferroni$var_complement
-    frac_sig_Bonferroni = sig_tim_Bonferroni$frac_subset
-    sig_results_Bonferroni = results[sig_filter_Bonferroni,]
-    num_sig_Bonferroni = sig_tim_Bonferroni$n_subset
-    num_nonsig_Bonferroni = sig_tim_Bonferroni$n_complement
+      sig_tim_Bonferroni <- frac_subset(results,sig_filter_Bonferroni,!sig_filter_Bonferroni,min_effsize,max_effsize,n_sample)
+      var_sig_Bonferroni = sig_tim_Bonferroni$var_subset
+      var_nonsig_Bonferroni = sig_tim_Bonferroni$var_complement
+      frac_sig_Bonferroni = sig_tim_Bonferroni$frac_subset
+      sig_results_Bonferroni = results[sig_filter_Bonferroni,]
+      num_sig_Bonferroni = sig_tim_Bonferroni$n_subset
+      num_nonsig_Bonferroni = sig_tim_Bonferroni$n_complement
 
+    } else {
+      var_sig_Bonferroni = 0
+      frac_sig_Bonferroni = 0
+      sig_results_Bonferroni = NA
+      num_sig_Bonferroni = 0
+      var_nonsig_Bonferroni = NA
+      num_nonsig_Bonferroni = nrow(results)
+    }
+
+    #significant genes: FDR
+    sig_filter_FDR = p.adjust(results$pvalue, method = "fdr") < 0.05
+    sig_filter_FDR[is.na(sig_filter_FDR)] <- FALSE
+    if (any(sig_filter_FDR)){
+
+      sig_tim_FDR <- frac_subset(results,sig_filter_FDR,!sig_filter_FDR,min_effsize,max_effsize,n_sample)
+      var_sig_FDR = sig_tim_FDR$var_subset
+      var_nonsig_FDR = sig_tim_FDR$var_complement
+      frac_sig_FDR = sig_tim_FDR$frac_subset
+      sig_results_FDR = results[sig_filter_FDR,]
+      num_sig_FDR = sig_tim_FDR$n_subset
+      num_nonsig_FDR = sig_tim_FDR$n_complement
+
+    } else {
+      var_sig_FDR = 0
+      frac_sig_FDR = 0
+      sig_results_FDR = NA
+      num_sig_FDR = 0
+      var_nonsig_FDR = NA
+      num_nonsig_FDR = nrow(results)
+    }
   } else {
-    var_sig_Bonferroni = 0
-    frac_sig_Bonferroni = 0
+    var_sig_Bonferroni = NA
+    frac_sig_Bonferroni = NA
     sig_results_Bonferroni = NA
-    num_sig_Bonferroni = 0
+    num_sig_Bonferroni = NA
     var_nonsig_Bonferroni = NA
-    num_nonsig_Bonferroni = nrow(results)
-  }
-
-  #significant genes: FDR
-  sig_filter_FDR = p.adjust(results$pvalue, method = "fdr") < 0.05
-  sig_filter_FDR[is.na(sig_filter_FDR)] <- FALSE
-  if (any(sig_filter_FDR)){
-
-    sig_tim_FDR <- frac_subset(results,sig_filter_FDR,!sig_filter_FDR,min_effsize,max_effsize,n_sample)
-    var_sig_FDR = sig_tim_FDR$var_subset
-    var_nonsig_FDR = sig_tim_FDR$var_complement
-    frac_sig_FDR = sig_tim_FDR$frac_subset
-    sig_results_FDR = results[sig_filter_FDR,]
-    num_sig_FDR = sig_tim_FDR$n_subset
-    num_nonsig_FDR = sig_tim_FDR$n_complement
-
-  } else {
-    var_sig_FDR = 0
-    frac_sig_FDR = 0
+    num_nonsig_Bonferroni = NA
+    var_sig_FDR = NA
+    frac_sig_FDR = NA
     sig_results_FDR = NA
-    num_sig_FDR = 0
+    num_sig_FDR = NA
     var_nonsig_FDR = NA
-    num_nonsig_FDR = nrow(results)
+    num_nonsig_FDR = NA
   }
+
 
 #  gene-set enrichments
   if (!is.null(annot_table)) {
