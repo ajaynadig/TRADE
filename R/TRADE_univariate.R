@@ -14,7 +14,7 @@ TRADE_univariate <- function(results = NULL,
   extreme_log2FC = abs(results$log2FoldChange) > 10
   num_extreme = sum(extreme_log2FC)
 
-  num_exclude = sum(na.filter | num_extreme)
+  num_exclude = sum(na.filter | abs(results$log2FoldChange) > 10)
 
   results = results[!na.filter & !extreme_log2FC,]
 
@@ -205,7 +205,7 @@ get_distribution_output <- function(results,n_sample, annot_table = NULL, model_
                          #posteriormeans = total_output$fit$result$PosteriorMean,
                          loglik = total_output$fit$loglik),
               distribution_summary = list(mean = mixture_mean,
-                                  variance = mixture_variance,
+                                  transcriptome_wide_impact = mixture_variance,
                                   Me = Me),
               significant_genes_Bonferroni = list(significant_gene_results_Bonferroni = sig_results_Bonferroni,
                                        var_sig_Bonferroni = var_sig_Bonferroni,
@@ -219,6 +219,7 @@ get_distribution_output <- function(results,n_sample, annot_table = NULL, model_
                                                   frac_sig_FDR = frac_sig_FDR,
                                                   num_sig_FDR = num_sig_FDR,
                                            num_nonsig_FDR = num_nonsig_FDR),
+              samples = total_output$samples,
               annot_output = annot_output_table))
 }
 
