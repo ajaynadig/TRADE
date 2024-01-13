@@ -6,4 +6,4 @@ To install TRADE in R, run: devtools::install_github("ajaynadig/TRADE")
 
 Documentation
 
-For documentation and example TRADE workflows, please see the wiki.
+For documentation and example TRADE workflows, please see the [wiki](https://github.com/ajaynadig/TRADE/wiki).
