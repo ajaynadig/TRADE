@@ -1,4 +1,4 @@
-![logo_image](https://github.com/ajaynadig/TRADE/blob/main/github_image_crop.jpeg?raw=true)
+![logo_image](https://github.com/ajaynadig/TRADE/blob/main/github_image_crop.jpg?raw=true)
 
 Transcriptome-wide Analysis of Differential Expression (TRADE) is a method to estimate the distribution of differential expression effects. TRADE is described in detail here(PAPER LINK)
 
