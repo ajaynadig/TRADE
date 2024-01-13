@@ -11,7 +11,7 @@ TRADE <- function(mode = NULL, #univariate or bivariate
                   covariance_matrix_set = "adaptive_grid", #what basis set of covariance matrices for bivariate analyses, "mash_default" or "adaptive_grid"
                   component_varexplained_threshold = 0, # for adaptive grid, what threshold variance explained for TRADE to retain in analysis
                   weight_nocorr = 1, # prior on bivariate component with 0 correlation. 1 corresponds to no penalty
-                  n_samples = NULL) { #how many samples to draw from distribution and include in output
+                  n_sample = NULL) { #how many samples to draw from distribution and include in output
 
   if (!(mode %in% c("univariate","bivariate"))) {
     stop("mode improperly specified; please use 'univariate' or 'bivariate")
@@ -39,7 +39,7 @@ TRADE <- function(mode = NULL, #univariate or bivariate
     output = TRADE_univariate(results = results1,
                               annot_table = annot_table,
                               model_significant = model_significant,
-                              n_sample = n_samples,
+                              n_sample = n_sample,
                               genes_exclude = genes_exclude)
 
   } else if (mode == "bivariate") {
@@ -50,7 +50,7 @@ TRADE <- function(mode = NULL, #univariate or bivariate
                              covariance_matrix_set = covariance_matrix_set,
                              component_varexplained_threshold = 0,
                              weight_nocorr = 1,
-                             n_sample = n_samples)
+                             n_sample = n_sample)
   }
 
   return(output)
