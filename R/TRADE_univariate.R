@@ -7,8 +7,13 @@ TRADE_univariate <- function(results = NULL,
                            model_significant = TRUE,
                            n_sample = 10000,
                            genes_exclude = NULL) {
-
-  na.filter = !is.finite(results$log2FoldChange) | !is.finite(results$lfcSE) | !is.finite(results$pvalue)
+  
+  if (model_significant) {
+    na.filter = !is.finite(results$log2FoldChange) | !is.finite(results$lfcSE) | !is.finite(results$pvalue)
+  } else {
+    na.filter = !is.finite(results$log2FoldChange) | !is.finite(results$lfcSE)
+    
+  }
   num_na = sum(na.filter)
 
   extreme_log2FC = abs(results$log2FoldChange) > 10
