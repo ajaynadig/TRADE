@@ -69,7 +69,7 @@ TRADE_bivariate <- function(results1 = NULL,
   }
   
   if (covariance_matrix_set == "adaptive_grid" | covariance_matrix_set == "combined") {
-    
+    message("Get adaptive grid covariance matrices")
     results1_ash <- ash(betahat_df[,1],
                         se_df[,1],
                         mixcompdist = "halfnormal",
@@ -128,6 +128,7 @@ TRADE_bivariate <- function(results1 = NULL,
   }
   
   if (covariance_matrix_set == "combined") {
+    message("Combining mash default and adaptive grid covariance matrices")
     #manually scale U.c and U.ed
     grid = autoselect_grid(data, sqrt(2))
     
@@ -206,4 +207,58 @@ TRADE_bivariate <- function(results1 = NULL,
               runtime = timediff))
 
 }
+
+#These utility functions are not exported by mashr, and are taken directly from the mashr repository
+grid_min = function(Bhat,Shat){
+  min(Shat)/10
+}
+
+grid_max = function(Bhat,Shat){
+  if (all(Bhat^2 <= Shat^2)) {
+    8 * grid_min(Bhat,Shat) # the unusual case where we don't need much grid
+  }  else {
+    2 * sqrt(max(Bhat^2 - Shat^2))
+  }
+}
+
+autoselect_grid = function(data,mult){
+  include = !(data$Shat==0 | !is.finite(data$Shat) | is.na(data$Bhat))
+  gmax = grid_max(data$Bhat[include], data$Shat[include])
+  gmin = grid_min(data$Bhat[include], data$Shat[include])
+  if (mult == 0) {
+    return(c(0, gmax/2))
+  }
+  else {
+    npoint = ceiling(log2(gmax/gmin)/log2(mult))
+    return(mult^((-npoint):0) * gmax)
+  }
+}
+
+expand_cov = function(Ulist,grid,usepointmass=TRUE){
+  scaled_Ulist = scale_cov(Ulist, grid)
+  R = nrow(Ulist[[1]])
+  if(usepointmass){
+    scaled_Ulist = c(list(null=matrix(0,nrow=R,ncol=R)),scaled_Ulist)
+  }
+  return(scaled_Ulist)
+}
+
+scale_cov = function(Ulist, grid){
+  orig_names = names(Ulist)
+  Ulist = unlist( lapply(grid^2, function(x){multiply_list(Ulist,x)}), recursive=FALSE)
+  names(Ulist) = unlist( lapply(1:length(grid), function(x){paste0(orig_names,".",x)}), recursive=FALSE)
+  return(Ulist)
+}
+
+multiply_list = function(Ulist, x){lapply(Ulist, function(U){x*U})}
+
+normalize_cov = function(U){
+  if(max(diag(U))!=0){
+    U = U/max(diag(U))
+  }
+  return(U)
+}
+
+normalize_Ulist = function(Ulist){lapply(Ulist,normalize_cov)}
+
 
