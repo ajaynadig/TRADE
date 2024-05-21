@@ -1,1 +1,6 @@
 exportPattern("^[[:alpha:]]+")
+import(ggplot2)
+import(ashr)
+import(mashr)
+import(ggplot2)
+import(doBy)
