@@ -35,6 +35,14 @@ TRADE <- function(mode = NULL, #univariate or bivariate
     }
   }
 
+  if(!is.null(annot_table)){
+    ncols_annot <- ncol(annot_table)
+    annot_table <- annot_table[,colSums(annot_table) > 0]
+    if(ncols_annot != ncol(annot_table)){
+      message(paste(ncols_annot - ncol(annot_table) ,"columns in annotation table have no annotations and were removed for having no genes"))
+    }
+  }
+
   if (mode == "univariate") {
     output = TRADE_univariate(results = results1,
                               annot_table = annot_table,
