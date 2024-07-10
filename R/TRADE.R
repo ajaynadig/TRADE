@@ -1,17 +1,46 @@
-TRADE <- function(mode = NULL, #univariate or bivariate
-                  results1, #first set of DE summary statistics
-                  results2 = NULL, #second set of DE summary statistics
-                  annot_table = NULL, #table of gene-wise annotations for enrichment analysis
-                  log2FoldChange = "log2FoldChange", #name of column with log2FoldChanges
-                  lfcSE = "lfcSE", #name of column with log2FoldChange standard errors
-                  pvalue = "pvalue", #name of column with p values
-                  model_significant = TRUE, #should trade run model separately on significant genes and calculate e.g. fraction significant?
-                  genes_exclude = NULL, #which genes should be excluded (e.g. perturbed genes?)
-                  estimate_sampling_covariance = FALSE, #in cases of shared samples in bivariate analysis, use ash utility to estimate sampling covariance matrices
-                  covariance_matrix_set = "combined", #what basis set of covariance matrices for bivariate analyses, "mash_default" or "adaptive_grid"
-                  component_varexplained_threshold = 0, # for adaptive grid, what threshold variance explained for TRADE to retain in analysis
-                  weight_nocorr = 1, # prior on bivariate component with 0 correlation. 1 corresponds to no penalty
-                  n_sample = NULL) { #how many samples to draw from distribution and include in output
+#' TRADE Function
+#'
+#' This function performs univariate or bivariate TRADE analysis on differential expression (DE) summary statistics.
+#'
+#' @param mode The mode of analysis, either "univariate" or "bivariate".
+#' @param results1 The first set of DE summary statistics.
+#' @param results2 The second set of DE summary statistics (required only for bivariate mode).
+#' @param annot_table Table of gene-wise annotations for enrichment analysis.
+#' @param log2FoldChange The name of the column with log2FoldChanges in the DE summary statistics.
+#' @param lfcSE The name of the column with log2FoldChange standard errors in the DE summary statistics.
+#' @param pvalue The name of the column with p values in the DE summary statistics.
+#' @param model_significant Should TRADE run the model separately on significant genes and calculate e.g. fraction significant? (default is TRUE)
+#' @param genes_exclude Which genes should be excluded (e.g. perturbed genes).
+#' @param estimate_sampling_covariance In cases of shared samples in bivariate analysis, use ash utility to estimate sampling covariance matrices (default is FALSE).
+#' @param covariance_matrix_set The basis set of covariance matrices for bivariate analyses, either "mash_default" or "adaptive_grid" (default is "combined").
+#' @param component_varexplained_threshold For adaptive grid, the threshold variance explained for TRADE to retain in analysis (default is 0).
+#' @param weight_nocorr The prior on bivariate component with 0 correlation. 1 corresponds to no penalty (default is 1).
+#' @param n_sample How many samples to draw from distribution and include in output.
+#'
+#' @return The output of the TRADE analysis.
+#'
+#' @examples
+#' # Example usage of TRADE function
+#' results1 <- read.csv("results1.csv")
+#' results2 <- read.csv("results2.csv")
+#' annot_table <- read.csv("annot_table.csv")
+#' trade_output <- TRADE(mode = "bivariate", results1 = results1, results2 = results2, annot_table = annot_table)
+#'
+#' @export
+TRADE <- function(mode = NULL, 
+                  results1, 
+                  results2 = NULL,
+                  annot_table = NULL,
+                  log2FoldChange = "log2FoldChange",
+                  lfcSE = "lfcSE", 
+                  pvalue = "pvalue",
+                  model_significant = TRUE,
+                  genes_exclude = NULL, 
+                  estimate_sampling_covariance = FALSE,
+                  covariance_matrix_set = "combined", 
+                  component_varexplained_threshold = 0,
+                  weight_nocorr = 1,
+                  n_sample = NULL) { 
 
   if (!(mode %in% c("univariate","bivariate"))) {
     stop("mode improperly specified; please use 'univariate' or 'bivariate")
