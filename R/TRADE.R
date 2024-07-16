@@ -12,7 +12,7 @@
 #' @param model_significant Should TRADE run the model separately on significant genes and calculate e.g. fraction significant? (default is TRUE)
 #' @param genes_exclude Which genes should be excluded (e.g. perturbed genes).
 #' @param estimate_sampling_covariance In cases of shared samples in bivariate analysis, use ash utility to estimate sampling covariance matrices (default is FALSE).
-#' @param covariance_matrix_set The basis set of covariance matrices for bivariate analyses, either "mash_default" or "adaptive_grid" (default is "combined").
+#' @param covariance_matrix_set The basis set of covariance matrices for bivariate analyses, either "mash_default", "adaptive_grid", or "combined" (default is "combined").
 #' @param component_varexplained_threshold For adaptive grid, the threshold variance explained for TRADE to retain in analysis (default is 0).
 #' @param weight_nocorr The prior on bivariate component with 0 correlation. 1 corresponds to no penalty (default is 1).
 #' @param n_sample How many samples to draw from distribution and include in output.
