@@ -82,11 +82,11 @@ TRADE <- function(mode = NULL,
   } else if (mode == "bivariate") {
     output = TRADE_bivariate(results1 = results1,
                              results2 = results2,
-                             genes_exclude = NULL,
-                             estimate_sampling_covariance = FALSE,
+                             genes_exclude = genes_exclude,
+                             estimate_sampling_covariance = estimate_sampling_covariance,
                              covariance_matrix_set = covariance_matrix_set,
-                             component_varexplained_threshold = 0,
-                             weight_nocorr = 1,
+                             component_varexplained_threshold = component_varexplained_threshold,
+                             weight_nocorr = weight_nocorr,
                              n_sample = n_sample)
   }
 
