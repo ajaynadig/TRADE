@@ -51,6 +51,12 @@ TRADE <- function(mode = NULL,
   # Wrangle first set of input DE summary statistics
   names(results1)[names(results1) == log2FoldChange] <- "log2FoldChange"
   names(results1)[names(results1) == lfcSE] <- "lfcSE"
+  if any(is.na(results1$log2FoldChange)) {
+      stop("NAs present in results1 log2FoldChange, please filter before running TRADE")
+    }
+  if any(is.na(results1$lfcSE)) {
+      stop("NAs present in results1 lfcSE, please filter before running TRADE")
+    }
   if (!is.null(pvalue)) {
     names(results1)[names(results1) == pvalue] <- "pvalue"
   }
@@ -59,6 +65,14 @@ TRADE <- function(mode = NULL,
   if (!is.null(results2)) {
     names(results2)[names(results2) == log2FoldChange] <- "log2FoldChange"
     names(results2)[names(results2) == lfcSE] <- "lfcSE"
+
+    if any(is.na(results2$log2FoldChange)) {
+        stop("NAs present in results2 log2FoldChange, please filter before running TRADE")
+      }
+    if any(is.na(results2$lfcSE)) {
+        stop("NAs present in results2 lfcSE, please filter before running TRADE")
+      }
+             
     if (!is.null(pvalue)) {
       names(results2)[names(results2) == pvalue] <- "pvalue"
     }
