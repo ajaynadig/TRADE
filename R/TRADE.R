@@ -40,13 +40,16 @@ TRADE <- function(mode = NULL,
                   covariance_matrix_set = "combined", 
                   component_varexplained_threshold = 0,
                   weight_nocorr = 1,
-                  n_sample = NULL) { 
+                  n_sample = NULL,
+                  verbose = FALSE) { 
 
   if (!(mode %in% c("univariate","bivariate"))) {
     stop("mode improperly specified; please use 'univariate' or 'bivariate")
   } else if (mode == "bivariate" & is.null(results2)) {
     stop("for bivariate mode, please provide second set of DE results")
   }
+  
+  if (verbose) {message("Wrangling summary statistics...")}
 
   # Wrangle first set of input DE summary statistics
   names(results1)[names(results1) == log2FoldChange] <- "log2FoldChange"
@@ -80,18 +83,19 @@ TRADE <- function(mode = NULL,
 
   if(!is.null(annot_table)){
     ncols_annot <- ncol(annot_table)
-    annot_table <- annot_table[,colSums(annot_table) > 0]
+    annot_table <- annot_table[,colSums(annot_table, na.rm = TRUE) > 0]
     if(ncols_annot != ncol(annot_table)){
       message(paste(ncols_annot - ncol(annot_table) ,"columns in annotation table have no annotations and were removed for having no genes"))
     }
   }
-
+  
   if (mode == "univariate") {
     output = TRADE_univariate(results = results1,
                               annot_table = annot_table,
                               model_significant = model_significant,
                               n_sample = n_sample,
-                              genes_exclude = genes_exclude)
+                              genes_exclude = genes_exclude,
+                              verbose = verbose)
 
   } else if (mode == "bivariate") {
     output = TRADE_bivariate(results1 = results1,
@@ -101,7 +105,8 @@ TRADE <- function(mode = NULL,
                              covariance_matrix_set = covariance_matrix_set,
                              component_varexplained_threshold = component_varexplained_threshold,
                              weight_nocorr = weight_nocorr,
-                             n_sample = n_sample)
+                             n_sample = n_sample,
+                             verbose = verbose)
   }
 
   return(output)

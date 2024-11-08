@@ -6,7 +6,8 @@ TRADE_univariate <- function(results = NULL,
                            annot_table = NULL,
                            model_significant = TRUE,
                            n_sample = 10000,
-                           genes_exclude = NULL) {
+                           genes_exclude = NULL,
+                           verbose = FALSE) {
   
   if (model_significant) {
     na.filter = !is.finite(results$log2FoldChange) | !is.finite(results$lfcSE) | !is.finite(results$pvalue)
@@ -41,7 +42,7 @@ TRADE_univariate <- function(results = NULL,
   #Set number of samples to be drawn to estimate distribution features
   if (is.null(n_sample)) {n_sample = nrow(results)}
   message("Fitting mixture model")
-  main_output = get_distribution_output(results,n_sample, annot_table = annot_table, model_significant = model_significant)
+  main_output = get_distribution_output(results,n_sample, annot_table = annot_table, model_significant = model_significant, verbose = verbose)
 
   main_output$qc = list(num_na = num_na,
                         num_extreme = num_extreme,
@@ -70,7 +71,7 @@ fit_ash <- function(l2fc,l2fc_se,min_l2fc,max_l2fc,n_sample) {
               samples = samples))
 }
 
-get_distribution_output <- function(results,n_sample, annot_table = NULL, model_significant = TRUE) {
+get_distribution_output <- function(results,n_sample, annot_table = NULL, model_significant = TRUE, verbose = FALSE) {
   min_effsize = min(results$log2FoldChange, na.rm = TRUE)
   max_effsize = max(results$log2FoldChange, na.rm = TRUE)
 
@@ -79,6 +80,9 @@ get_distribution_output <- function(results,n_sample, annot_table = NULL, model_
                          min_effsize,
                          max_effsize,
                          n_sample)
+  
+  if (verbose) {message("Computing Distribution Features")}
+  
 
   #calculate var and mean
   means = (total_output$fit$fitted_g$a + total_output$fit$fitted_g$b)/2
@@ -118,6 +122,8 @@ get_distribution_output <- function(results,n_sample, annot_table = NULL, model_
     labs(x = "Log2(FC)")
 
   if (model_significant) {
+    if (verbose) {message("Computing Significant Gene Features")}
+    
     #significant genes: Bonferroni
     sig_filter_Bonferroni = results$pvalue < 0.05/sum(!is.na(results$pvalue))
     sig_filter_Bonferroni[is.na(sig_filter_Bonferroni)] <- FALSE
@@ -139,7 +145,7 @@ get_distribution_output <- function(results,n_sample, annot_table = NULL, model_
       var_nonsig_Bonferroni = NA
       num_nonsig_Bonferroni = nrow(results)
     }
-
+    
     #significant genes: FDR
     sig_filter_FDR = p.adjust(results$pvalue, method = "fdr") < 0.05
     sig_filter_FDR[is.na(sig_filter_FDR)] <- FALSE
@@ -179,6 +185,8 @@ get_distribution_output <- function(results,n_sample, annot_table = NULL, model_
 
 #  gene-set enrichments
   if (!is.null(annot_table)) {
+    if (verbose) {message("Computing Enrichments")}
+    
     frac_var_annot = sapply(1:ncol(annot_table),
                         function(annot) {
                           output_annot =  frac_subset(results,
@@ -204,6 +212,9 @@ get_distribution_output <- function(results,n_sample, annot_table = NULL, model_
   } else {
     annot_output_table = NA
   }
+  
+  if (verbose) {message(paste("TI =",round(mixture_variance,4)))}
+  
 
   return(list(plot = plot,
               fit = list(distribution = total_output$fit$fitted_g,

@@ -8,7 +8,8 @@ TRADE_bivariate <- function(results1 = NULL,
                           covariance_matrix_set = "combined",
                           component_varexplained_threshold = 0,
                           weight_nocorr = 1,
-                          n_sample = NULL) {
+                          n_sample = NULL,
+                          verbose = FALSE) {
   start_time = Sys.time()
 
   #Gene Exclusion
@@ -19,7 +20,8 @@ TRADE_bivariate <- function(results1 = NULL,
   } else if (!is.null(genes_exclude) & !(any(genes_exclude %in% c(rownames(results1),rownames(results2))))) {
     message("No Exclusion Genes in Results")
   }
-
+  
+  
   message("Fitting mixture model")
 
 
@@ -42,15 +44,16 @@ TRADE_bivariate <- function(results1 = NULL,
   #Three modes: mash_default, adaptive_grid, and combined
 
   if (covariance_matrix_set == "mash_default" | covariance_matrix_set == "combined") {
+    if (verbose) {message("Get data-driven covariance matrices")}
     
-    message("Get data-driven covariance matrices")
     m.1by1 = mash_1by1(data)
     strong = unique(which.minn(m.1by1$result$lfsr[,1],round(0.05 * nrow(m.1by1$result$lfsr))),
                     which.minn(m.1by1$result$lfsr[,2],round(0.05 * nrow((m.1by1$result$lfsr)))))
     U.pca = cov_pca(data,2,subset=strong)
     U.ed = cov_ed(data, U.pca, subset=strong)
     
-    message("Get canonical covariance matrices")
+    if (verbose) {message("Get canonical covariance matrices")}
+    
     U.c = cov_canonical(data)
     
     
@@ -69,7 +72,9 @@ TRADE_bivariate <- function(results1 = NULL,
   }
   
   if (covariance_matrix_set == "adaptive_grid" | covariance_matrix_set == "combined") {
-    message("Get adaptive grid covariance matrices")
+   
+    if (verbose) {message("Get adaptive grid covariance matrices")}
+    
     results1_ash <- ash(betahat_df[,1],
                         se_df[,1],
                         mixcompdist = "halfnormal",
@@ -117,7 +122,9 @@ TRADE_bivariate <- function(results1 = NULL,
                        if (covarmat[1,2] !=0) {return(1)} else {return(weight_nocorr)}
                      }))
     if (estimate_sampling_covariance & covariance_matrix_set == "adaptive_grid") {
-      message("Estimate sampling correlation")
+
+      if (verbose) {message("Estimate sampling correlation")}
+      
       V.em = mash_estimate_corr_em(data, U, grid = 1,normalizeU = FALSE)
       data = mash_update_data(data, V=V.em$V)
     }
@@ -128,7 +135,8 @@ TRADE_bivariate <- function(results1 = NULL,
   }
   
   if (covariance_matrix_set == "combined") {
-    message("Combining mash default and adaptive grid covariance matrices")
+    if (verbose) {message("Combining mash default and adaptive grid covariance matrices")}
+    
     #manually scale U.c and U.ed
     grid = autoselect_grid(data, sqrt(2))
     
@@ -137,7 +145,8 @@ TRADE_bivariate <- function(results1 = NULL,
     U = unique(c(xU_mashdefault,U_adaptive_grid))
     
     if (estimate_sampling_covariance) {
-      message("Estimate sampling correlation")
+      if (verbose) {message("Estimate sampling correlation")}
+      
       V.em = mash_estimate_corr_em(data, U, grid = 1,normalizeU = FALSE)
       data = mash_update_data(data, V=V.em$V)
     }
@@ -148,8 +157,8 @@ TRADE_bivariate <- function(results1 = NULL,
   
 
   message("Run mash")
-
-  message("Compute mixture covariance matrix")
+  if (verbose) {message("Compute mixture covariance matrix")}
+  
   covariance_matrices = array(data = NA, dim = c(2,2,length(m$fitted_g$pi)))
   covariance_matrices[,,1] <- 0
 
