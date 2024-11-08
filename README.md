@@ -11,3 +11,11 @@ To install TRADE in R, run: `devtools::install_github("ajaynadig/TRADE")`
 
 For documentation and example TRADE workflows, please see the [wiki](https://github.com/ajaynadig/TRADE/wiki).
 
+**Dependencies**
+
+TRADE requires the following packages, that should be automatically installed when you install TRADE:
+
+* `ashr` 2.2
+* `mashr` 0.2.79 (Note: this package also requires an installation of GNU Scientific Library)
+* `doBy ` 4.6.20
+* `ggplot2 ` 3.5.0
